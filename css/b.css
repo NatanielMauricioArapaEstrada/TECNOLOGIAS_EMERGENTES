@@ -1,0 +1,73 @@
+
+    :root{
+      --bg:#0f172a;          /* slate-900 */
+      --card:#111827;        /* gray-900 */
+      --muted:#94a3b8;       /* slate-400 */
+      --text:#e5e7eb;        /* gray-200 */
+      --accent:#22d3ee;      /* cyan-400 */
+      --accent-2:#06b6d4;    /* cyan-500 */
+      --ok:#34d399;          /* green-400 */
+      --warn:#fbbf24;        /* amber-400 */
+      --danger:#fb7185;      /* rose-400 */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 80% -10%, rgba(34,211,238,.15), transparent 60%),
+                  radial-gradient(900px 500px at -10% 10%, rgba(6,182,212,.12), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100dvh;
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px; border-bottom:1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(8px);
+      background: linear-gradient( to bottom, rgba(17,24,39,.8), rgba(17,24,39,.4));
+    }
+    .brand{display:flex; gap:12px; align-items:center; font-weight:700; letter-spacing:.3px}
+    .brand .logo{width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 6px 16px rgba(34,211,238,.35); display:grid; place-items:center; font-size:18px; color:#0b1220}
+    .login-btn{appearance:none; border:1px solid rgba(255,255,255,.08); background:#0b1220; color:var(--text); padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; transition:.2s; box-shadow: var(--shadow)}
+    .login-btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.18)}
+
+    .layout{display:grid; grid-template-columns: 260px 1fr; gap:18px; padding:18px; max-width:1200px; margin:0 auto}
+    @media (max-width: 900px){ .layout{grid-template-columns: 1fr} }
+
+    aside{background:rgba(17,24,39,.75); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow)}
+    aside h3{margin:4px 0 12px; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.15em}
+    .rooms{display:flex; flex-direction:column; gap:8px}
+    .room{display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.06); background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)); cursor:pointer}
+    .room:hover{border-color: rgba(255,255,255,.16)}
+    .room small{color:var(--muted)}
+
+    main{display:grid; gap:18px}
+    .grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:18px}
+    .card{grid-column: span 12; background:rgba(17,24,39,.75); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); padding:18px; box-shadow: var(--shadow)}
+    @media (min-width: 700px){ .span-4{grid-column: span 4} .span-6{grid-column: span 6} }
+
+    .card h2{margin:0 0 8px; font-size:18px}
+    .muted{color:var(--muted); font-size:14px}
+
+    /* Toggle switch */
+    .toggle{position:relative; display:inline-block; width:48px; height:28px}
+    .toggle input{opacity:0; width:0; height:0}
+    .slider{position:absolute; cursor:pointer; inset:0; background:#1f2937; border:1px solid rgba(255,255,255,.08); transition:.25s; border-radius:999px}
+    .slider:before{position:absolute; content:""; height:22px; width:22px; left:3px; top:2px; background:white; border-radius:50%; transition:.25s}
+    input:checked + .slider{background: linear-gradient(90deg, var(--accent), var(--accent-2))}
+    input:checked + .slider:before{transform: translateX(20px)}
+
+    .row{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .devices{display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:14px}
+    .device{border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px; background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)); display:grid; gap:8px}
+    .pill{font-size:12px; padding:3px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.12); color:var(--muted); display:inline-block}
+
+    .kpi{display:flex; gap:12px; align-items:center}
+    .kpi .dot{width:10px; height:10px; border-radius:50%}
+    .ok{background:var(--ok)} .warn{background:var(--warn)} .danger{background:var(--danger)}
+
+    footer{opacity:.7; font-size:12px; text-align:center; padding:20px}
+    a{color:var(--accent)}
+  

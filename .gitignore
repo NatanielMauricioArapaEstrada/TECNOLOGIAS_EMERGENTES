@@ -1,0 +1,11 @@
+# Node
+node_modules/
+npm-debug.log
+.DS_Store
+
+# Archivos de construcción (si usas build tools)
+dist/
+build/
+
+# Configs locales
+.env
