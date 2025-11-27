@@ -33,7 +33,15 @@
             <div class="card-header">💡 Iluminación</div>
             
             <div class="control-row">
-                <span>Sala</span>
+                <span>Entrada</span>
+                <label class="switch">
+                    <input type="checkbox" id="sw-luzEntrada" onchange="toggleDevice('sw-luzEntrada')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-row">
+                <span>Sala (General)</span>
                 <label class="switch">
                     <input type="checkbox" id="sw-luzSala" onchange="toggleDevice('sw-luzSala')">
                     <span class="slider"></span>
@@ -58,8 +66,26 @@
         </div>
 
         <div class="card">
-            <div class="card-header">🚪 Puertas</div>
+            <div class="card-header">🚪 Puertas & Garage</div>
             
+            <!-- NUEVO: Puerta Principal -->
+            <div class="control-row">
+                <span>Puerta Principal</span>
+                <label class="switch">
+                    <input type="checkbox" id="sw-puertaPrincipal" onchange="toggleDevice('sw-puertaPrincipal')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- NUEVO: Portón Garage -->
+            <div class="control-row">
+                <span>Portón Garage</span>
+                <label class="switch">
+                    <input type="checkbox" id="sw-puertaGarage" onchange="toggleDevice('sw-puertaGarage')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
             <div class="control-row">
                 <span>Baño Visita</span>
                 <label class="switch">
@@ -124,11 +150,9 @@
     </div>
 
     <script type="module">
-        // Importamos 'get' ademas de 'onValue'
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
 
-        // Tu configuración
         const firebaseConfig = {
             apiKey: "AIzaSyAP0AfXzS4VsY_oAdkucpGihyhNlO9AJEA",
             authDomain: "registro-tiempo-real.firebaseapp.com",
@@ -145,8 +169,10 @@
         const comandosRef = ref(db, 'comandos');
         const sensoresRef = ref(db, 'sensores');
 
+        // AGREGAMOS LOS NUEVOS DISPOSITIVOS AL MAPA
         const deviceMap = {
             'sw-luzSala': 'luzSala',
+            'sw-luzEntrada': 'luzEntrada', 
             'sw-luzGarage': 'luzGarage',
             'sw-luzBanio': 'luzBanio',
             'sw-puertaInv': 'puertaInv',
@@ -155,10 +181,13 @@
             'sw-puertaB': 'puertaB',
             'sw-puertaBanioB': 'puertaBanioB',
             'sw-ventManual': 'ventManual',
-            'sw-ventAuto': 'ventAuto'
+            'sw-ventAuto': 'ventAuto',
+            // NUEVOS
+            'sw-puertaPrincipal': 'puertaPrincipal',
+            'sw-puertaGarage': 'puertaGarage'
         };
 
-        // 1. LEER COMANDOS (Esto lo dejamos en tiempo real para ver si alguien más prende una luz)
+        // 1. LEER COMANDOS
         onValue(comandosRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
@@ -183,29 +212,21 @@
         });
 
         
-        // 2. NUEVA FUNCIÓN: Pedir lectura al Hardware
-window.refreshSensors = function() {
-    console.log("Despertando al Mega para leer...");
-    
-    // Poner visualmente que está cargando
-    document.getElementById('val-temp').innerText = "..";
-    document.getElementById('val-hum').innerText = "..";
+        // 2. PEDIR LECTURA
+        window.refreshSensors = function() {
+            console.log("Despertando al Mega para leer...");
+            
+            document.getElementById('val-temp').innerText = "..";
+            document.getElementById('val-hum').innerText = "..";
 
-    // Escribimos un "1" en la variable 'leerSensor' dentro de comandos
-    const updates = {};
-    updates['/comandos/leerSensor'] = 1;
+            const updates = {};
+            updates['/comandos/leerSensor'] = 1;
 
-    update(ref(db), updates)
-        .then(() => console.log("Orden de lectura enviada."))
-        .catch((error) => console.error("Error enviando orden:", error));
-    
-    // NOTA: No necesitamos hacer un 'get' aquí. 
-    // Cuando el Mega responda y el ESP suba el dato, 
-    // el 'onValue(sensoresRef...)' que ya tienes actualizará la pantalla solo.
-    
-}
+            update(ref(db), updates)
+                .then(() => console.log("Orden de lectura enviada."))
+                .catch((error) => console.error("Error enviando orden:", error));
+        }
 
-        // Llamamos a la función una vez al iniciar la página para que no aparezca vacía
         window.refreshSensors();
 
         // 3. ESCRIBIR DATOS (Toggle)
@@ -224,20 +245,16 @@ window.refreshSensors = function() {
                 .catch((error) => console.error("Error actualizando", error));
         }
         
-        
-        // 4. ESCUCHAR DATOS DE SENSORES EN TIEMPO REAL
-onValue(sensoresRef, (snapshot) => {
-    const data = snapshot.val();
-    if (!data) return;
+        // 4. ESCUCHAR DATOS SENSORES
+        onValue(sensoresRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
 
-    console.log("Sensores actualizados:", data);
+            console.log("Sensores actualizados:", data);
 
-    // Actualizar HTML con nombres reales del Firebase
-    document.getElementById('val-temp').innerText = data.temperatura ?? "--";
-    document.getElementById('val-hum').innerText = data.humedad ?? "--";
-});
-
-
+            document.getElementById('val-temp').innerText = data.temperatura ?? "--";
+            document.getElementById('val-hum').innerText = data.humedad ?? "--";
+        });
 
     </script>
 </body>
