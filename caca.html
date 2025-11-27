@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Casa Domótica</title>
+    
+    <!-- ========================================= -->
+    <!--              SECCIÓN CSS                  -->
+    <!-- (Copia esto en un archivo estilos.css)    -->
+    <!-- ========================================= -->
+    <style>
+        /* TU ESTILO ORIGINAL */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #5C4B51;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #AEE6E6, #F9E4B7, #B5CDA3);
+            background-size: 400% 400%;
+            animation: fondoSalmon 15s ease infinite;
+            min-height: 100vh; /* Asegura que cubra toda la pantalla */
+        }
+
+        @keyframes fondoSalmon {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h2 {
+            color: #D97D54;
+            background-color: #FFE5DC;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(217, 125, 84, 0.2);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* ESTILOS ADICIONALES PARA EL DASHBOARD */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .card {
+            background-color: rgba(255, 240, 235, 0.9); /* #FFF0EB con transparencia */
+            border: 2px solid #F7C8B0;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: #D97D54;
+        }
+
+        .card-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #D97D54;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #F7C8B0;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Estilos para Sensores */
+        .sensor-display {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .sensor-item {
+            text-align: center;
+        }
+        .sensor-value {
+            color: #D97D54;
+            font-size: 2rem;
+        }
+        .unit {
+            font-size: 1rem;
+            color: #5C4B51;
+        }
+
+        /* Estilos para Interruptores (Toggles) */
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #F7A072; /* Color salmón activo */
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #D97D54;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Estado deshabilitado para ventilador manual si auto está on */
+        input:disabled + .slider {
+            background-color: #e0e0e0;
+            cursor: not-allowed;
+        }
+
+        .status-text {
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🏡 Panel de Control Domótico</h2>
+
+    <div class="dashboard-container">
+        
+        <!-- TARJETA DE SENSORES -->
+        <div class="card">
+            <div class="card-header">🌡️ Monitor Ambiental</div>
+            <div class="sensor-display">
+                <div class="sensor-item">
+                    <div>Temp</div>
+                    <span id="val-temp" class="sensor-value">--</span><span class="unit">°C</span>
+                </div>
+                <div class="sensor-item">
+                    <div>Humedad</div>
+                    <span id="val-hum" class="sensor-value">--</span><span class="unit">%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TARJETA DE LUCES -->
+        <div class="card">
+            <div class="card-header">💡 Iluminación</div>
+            
+            <div class="control-row">
+                <span>Sala</span>
+                <label class="switch">
+                    <!-- CORREGIDO: Se pasa 'sw-luzSala' en lugar de 'luzSala' -->
+                    <input type="checkbox" id="sw-luzSala" onchange="toggleDevice('sw-luzSala')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="control-row">
+                <span>Garage</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-luzGarage" onchange="toggleDevice('sw-luzGarage')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-row">
+                <span>Baño Inv.</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-luzBanio" onchange="toggleDevice('sw-luzBanio')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- TARJETA DE PUERTAS -->
+        <div class="card">
+            <div class="card-header">🚪 Puertas</div>
+            
+            <div class="control-row">
+                <span>Baño Visita</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-puertaInv" onchange="toggleDevice('sw-puertaInv')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-row">
+                <span>Baño Privado</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-puertaPriv" onchange="toggleDevice('sw-puertaPriv')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-row">
+                <span>Cuarto A</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-puertaA" onchange="toggleDevice('sw-puertaA')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-row">
+                <span>Cuarto B</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-puertaB" onchange="toggleDevice('sw-puertaB')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+             <div class="control-row">
+                <span>Baño B</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-puertaBanioB" onchange="toggleDevice('sw-puertaBanioB')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- TARJETA DE CLIMATIZACIÓN -->
+        <div class="card">
+            <div class="card-header">❄️ Ventilación</div>
+            
+            <div class="control-row">
+                <span>Modo Automático</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-ventAuto" onchange="toggleDevice('sw-ventAuto')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-row">
+                <span>Manual (ON/OFF)</span>
+                <label class="switch">
+                    <!-- CORREGIDO -->
+                    <input type="checkbox" id="sw-ventManual" onchange="toggleDevice('sw-ventManual')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <p class="status-text" id="fan-status-msg">Si Auto está encendido, el manual se ignora.</p>
+        </div>
+
+    </div>
+
+    <!-- ========================================= -->
+    <!--            SECCIÓN JAVASCRIPT             -->
+    <!-- (Copia esto en un archivo main.js)        -->
+    <!-- ========================================= -->
+    <script type="module">
+        // Importar las funciones SDKs que necesitas
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+
+        // Tu configuración
+        const firebaseConfig = {
+            apiKey: "AIzaSyAP0AfXzS4VsY_oAdkucpGihyhNlO9AJEA",
+            authDomain: "registro-tiempo-real.firebaseapp.com",
+            databaseURL: "https://registro-tiempo-real-default-rtdb.firebaseio.com",
+            projectId: "registro-tiempo-real",
+            storageBucket: "registro-tiempo-real.firebasestorage.app",
+            messagingSenderId: "266350344341",
+            appId: "1:266350344341:web:fec3443ea8d6ab2c79039c"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Referencias a la base de datos
+        const comandosRef = ref(db, 'comandos');
+        const sensoresRef = ref(db, 'sensores');
+
+        // Mapa para conectar ID del HTML con la clave en Firebase
+        const deviceMap = {
+            'sw-luzSala': 'luzSala',
+            'sw-luzGarage': 'luzGarage',
+            'sw-luzBanio': 'luzBanio',
+            'sw-puertaInv': 'puertaInv',
+            'sw-puertaPriv': 'puertaPriv',
+            'sw-puertaA': 'puertaA',
+            'sw-puertaB': 'puertaB',
+            'sw-puertaBanioB': 'puertaBanioB',
+            'sw-ventManual': 'ventManual',
+            'sw-ventAuto': 'ventAuto'
+        };
+
+        // 1. LEER DATOS: Escuchar cambios en /comandos (para actualizar botones si cambian externamente)
+        onValue(comandosRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            // Recorrer el mapa y actualizar los checkbox
+            for (const [htmlId, dbKey] of Object.entries(deviceMap)) {
+                const element = document.getElementById(htmlId);
+                if (element) {
+                    // Si en DB es 1 -> checked = true
+                    element.checked = (data[dbKey] === 1);
+                }
+            }
+
+            // Lógica visual extra para el ventilador
+            const manualFanSwitch = document.getElementById('sw-ventManual');
+            const fanMsg = document.getElementById('fan-status-msg');
+            
+            if (data.ventAuto === 1) {
+                manualFanSwitch.disabled = true;
+                fanMsg.innerText = "Modo Automático activo: control por temperatura.";
+            } else {
+                manualFanSwitch.disabled = false;
+                fanMsg.innerText = "Modo Manual activo: usa el interruptor.";
+            }
+        });
+
+        // 2. LEER DATOS: Escuchar cambios en /sensores
+        onValue(sensoresRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            document.getElementById('val-temp').innerText = data.temperatura || 0;
+            document.getElementById('val-hum').innerText = data.humedad || 0;
+        });
+
+        // 3. ESCRIBIR DATOS: Función global para el evento onchange
+        // Necesitamos exponer esta función al objeto window para que el HTML la vea
+        window.toggleDevice = function(keyID) {
+            // keyID ahora es 'sw-luzSala', por lo que el mapa y el getElementById funcionarán
+            const dbKey = deviceMap[keyID]; 
+            const isChecked = document.getElementById(keyID).checked;
+            const valorToSend = isChecked ? 1 : 0;
+
+            if (!dbKey) {
+                console.error("No se encontró mapeo para:", keyID);
+                return;
+            }
+
+            const updates = {};
+            updates['/comandos/' + dbKey] = valorToSend;
+
+            update(ref(db), updates)
+                .then(() => console.log("Cambiado " + dbKey + " a " + valorToSend))
+                .catch((error) => console.error("Error actualizando", error));
+        }
+    </script>
+</body>
+</html>
