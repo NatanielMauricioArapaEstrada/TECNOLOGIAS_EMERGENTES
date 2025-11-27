@@ -4,184 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control Casa Domótica</title>
-    
-    <style>
-        /* TU ESTILO ORIGINAL */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #5C4B51;
-            margin: 0;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: linear-gradient(135deg, #AEE6E6, #F9E4B7, #B5CDA3);
-            background-size: 400% 400%;
-            animation: fondoSalmon 15s ease infinite;
-            min-height: 100vh;
-        }
-
-        @keyframes fondoSalmon {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        h2 {
-            color: #D97D54;
-            background-color: #FFE5DC;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(217, 125, 84, 0.2);
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-        }
-
-        .card {
-            background-color: rgba(255, 240, 235, 0.9);
-            border: 2px solid #F7C8B0;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            border-color: #D97D54;
-        }
-
-        .card-header {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #D97D54;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #F7C8B0;
-            padding-bottom: 0.5rem;
-        }
-
-        /* Estilos para Sensores */
-        .sensor-display {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .sensor-item {
-            text-align: center;
-        }
-        .sensor-value {
-            color: #D97D54;
-            font-size: 2rem;
-        }
-        .unit {
-            font-size: 1rem;
-            color: #5C4B51;
-        }
-
-        /* --- NUEVO ESTILO PARA EL BOTÓN DE REFRESH --- */
-        .refresh-btn {
-            background-color: #D97D54;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 15px;
-            width: 100%;
-            transition: background 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-        .refresh-btn:hover {
-            background-color: #c06035;
-        }
-        .refresh-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Estilos para Interruptores (Toggles) */
-        .control-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-            background: rgba(255,255,255,0.5);
-            border-radius: 8px;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
-
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: #F7A072;
-        }
-
-        input:focus + .slider {
-            box-shadow: 0 0 1px #D97D54;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        input:disabled + .slider {
-            background-color: #e0e0e0;
-            cursor: not-allowed;
-        }
-
-        .status-text {
-            font-size: 0.8rem;
-            color: #888;
-        }
-    </style>
+    <link rel="stylesheet" href="css/b.css">
 </head>
 <body>
 
@@ -359,6 +182,7 @@
             }
         });
 
+        
         // 2. NUEVA FUNCIÓN: Pedir lectura al Hardware
 window.refreshSensors = function() {
     console.log("Despertando al Mega para leer...");
@@ -378,6 +202,7 @@ window.refreshSensors = function() {
     // NOTA: No necesitamos hacer un 'get' aquí. 
     // Cuando el Mega responda y el ESP suba el dato, 
     // el 'onValue(sensoresRef...)' que ya tienes actualizará la pantalla solo.
+    
 }
 
         // Llamamos a la función una vez al iniciar la página para que no aparezca vacía
@@ -398,6 +223,22 @@ window.refreshSensors = function() {
                 .then(() => console.log("Cambiado " + dbKey + " a " + valorToSend))
                 .catch((error) => console.error("Error actualizando", error));
         }
+        
+        
+        // 4. ESCUCHAR DATOS DE SENSORES EN TIEMPO REAL
+onValue(sensoresRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    console.log("Sensores actualizados:", data);
+
+    // Actualizar HTML con nombres reales del Firebase
+    document.getElementById('val-temp').innerText = data.temperatura ?? "--";
+    document.getElementById('val-hum').innerText = data.humedad ?? "--";
+});
+
+
+
     </script>
 </body>
 </html>
